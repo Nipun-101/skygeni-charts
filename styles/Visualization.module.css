@@ -1,0 +1,157 @@
+.page {
+  min-height: 100vh;
+  background-color: #f5f5f5;
+  padding: 2rem;
+}
+
+.main {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+.title {
+  text-align: center;
+  color: #333;
+  margin-bottom: 1rem;
+  font-size: 1.5rem;
+}
+
+.chartsContainer {
+  display: flex;
+  gap: 20px;
+  max-width: 1400px;
+  margin: 0 auto 20px;
+}
+
+.barChartContainer {
+  flex: 2;
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  height: 600px;
+  position: relative;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.barChartContainer svg {
+  overflow: visible;
+}
+
+.barChartContainer :global(.domain) {
+  stroke: #e0e0e0;
+  stroke-width: 1px;
+}
+
+.barChartContainer :global(.tick line) {
+  stroke: #e0e0e0;
+  stroke-width: 1px;
+}
+
+.pieChartContainer {
+  flex: 1;
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  height: 600px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.pieChartContainer svg {
+  overflow: visible;
+}
+
+.tableContainer {
+  width: 100%;
+  max-width: 1400px;
+  overflow-x: auto;
+  margin: 20px auto;
+  background: white;
+  padding: 16px;
+}
+
+.table {
+  border-collapse: collapse;
+  width: 100%;
+  font-family: Arial, sans-serif;
+  margin-top: 16px;
+  font-size: 0.875rem;
+}
+
+.headerCell {
+  background-color: #5B87DB;
+  color: white;
+  padding: 8px;
+  text-align: center;
+  border: 1px solid #ddd;
+  width: 15%;
+  font-size: 0.875rem;
+}
+
+.quarterHeaderCell {
+  background-color: #7FA7E8;
+  color: white;
+  padding: 8px;
+  text-align: center;
+  border: 1px solid #ddd;
+  font-size: 0.875rem;
+}
+
+.totalHeaderCell {
+  background-color: #5B87DB;
+  color: white;
+  padding: 8px;
+  text-align: center;
+  border: 1px solid #ddd;
+  font-size: 0.875rem;
+}
+
+.subHeaderCell {
+  background-color: #5B87DB;
+  color: white;
+  padding: 8px;
+  border: 1px solid #ddd;
+  white-space: nowrap;
+  font-size: 0.875rem;
+}
+
+.tableRow {
+  background-color: white;
+}
+
+.evenRow {
+  background-color: #F5F5F5;
+}
+
+.totalRow {
+  font-weight: bold;
+}
+
+.dataCell {
+  padding: 6px 8px;
+  border: 1px solid #ddd;
+  font-size: 0.875rem;
+}
+
+.centerAlign {
+  text-align: center;
+}
+
+.rightAlign {
+  text-align: right;
+}
+
+@media (max-width: 1024px) {
+  .main {
+    padding: 0 10px;
+  }
+}
+
+@media (max-width: 768px) {
+  .page {
+    padding: 1rem;
+  }
+} 
