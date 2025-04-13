@@ -19,19 +19,19 @@
 
 .chartsContainer {
   display: flex;
-  gap: 20px;
-  max-width: 1400px;
-  margin: 0 auto 20px;
+  justify-content: space-between;
+  width: 100%;
+  margin: 24px 0;
+  gap: 16px;
 }
 
 .barChartContainer {
-  flex: 2;
-  background: white;
+  background-color: white;
   padding: 20px;
   border-radius: 8px;
-  height: 600px;
-  position: relative;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  width: 70%;
+  height: 500px;
 }
 
 .barChartContainer svg {
@@ -49,28 +49,32 @@
 }
 
 .pieChartContainer {
-  flex: 1;
-  background: white;
+  background-color: white;
   padding: 20px;
   border-radius: 8px;
-  height: 600px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  width: 30%;
+  height: 500px;
   display: flex;
-  flex-direction: column;
   justify-content: center;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  align-items: center;
 }
 
 .pieChartContainer svg {
   overflow: visible;
+  max-width: 100%;
+  max-height: 100%;
 }
 
 .tableContainer {
   width: 100%;
   max-width: 1400px;
-  overflow-x: auto;
-  margin: 20px auto;
-  background: white;
+  /* margin: 24px 0; */
+  background-color: white;
   padding: 16px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  /* overflow-x: auto; */
 }
 
 .table {

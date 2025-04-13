@@ -229,94 +229,97 @@ export default function Home() {
     });
 
     // Create Pie Chart
-    const pieWidth = pieChartRef.current.clientWidth;
-    const pieHeight = pieChartRef.current.clientHeight;
-    const radius = Math.min(pieWidth, pieHeight) / 2 - 80;
-
-    const pieSvg = d3.select(pieChartRef.current)
-      .append("svg")
-      .attr("width", pieWidth)
-      .attr("height", pieHeight)
-      .append("g")
-      .attr("transform", `translate(${pieWidth / 2},${pieHeight / 2})`);
-
-    const pieData = [
-      { name: 'Existing Customer', value: data.totals['Existing Customer'].acv },
-      { name: 'New Customer', value: data.totals['New Customer'].acv }
-    ];
-
-    const pie = d3.pie()
-      .value(d => d.value)
-      .sort(null); // Prevent automatic sorting
-
-    const arc = d3.arc()
-      .innerRadius(radius * 0.5)
-      .outerRadius(radius);
-
-    // Create pie chart segments
-    const segments = pieSvg.selectAll("path")
-      .data(pie(pieData))
-      .join("path")
-      .attr("d", arc)
-      .attr("fill", d => color(d.data.name))
-      .attr("stroke", "white")
-      .style("stroke-width", "2px");
-
-    // Add center text
-    const centerGroup = pieSvg.append("g");
-    
-    centerGroup.append("text")
-      .attr("text-anchor", "middle")
-      .attr("dy", "-0.2em")
-      .attr("font-size", "16px")
-      .style("font-weight", "500")
-      .text("Total");
-
-    centerGroup.append("text")
-      .attr("text-anchor", "middle")
-      .attr("dy", "1.2em")
-      .attr("font-size", "16px")
-      .style("font-weight", "600")
-      .text(`$${(data.totals['Total'].acv / 1000).toFixed(0)}K`);
-
-    // Add value labels with lines
-    const labelLines = pieSvg.selectAll(".label-line")
-      .data(pie(pieData))
-      .join("g")
-      .attr("class", "label-line");
-
-    // Calculate label positions
-    const labelPositions = pie(pieData).map(d => {
-      const pos = arc.centroid(d);
-      const midAngle = d.startAngle + (d.endAngle - d.startAngle) / 2;
-      const x = pos[0] * 1.5;
-      const y = pos[1] * 1.5;
+    const pieChart = () => {
+      const pieWidth = 300;
+      const pieHeight = 300;
+      const radius = Math.min(pieWidth, pieHeight) / 2 - 60;
       
-      // Adjust x position based on which half of the pie we're on
-      const textAnchor = midAngle < Math.PI ? "start" : "end";
-      const labelX = midAngle < Math.PI ? x + 10 : x - 10;
+      // Clear any existing SVG
+      d3.select(pieChartRef.current).select("svg").remove();
       
-      return { x, y, labelX, textAnchor, midAngle };
-    });
+      // Create new SVG
+      const svg = d3.select(pieChartRef.current)
+        .append("svg")
+        .attr("width", pieWidth)
+        .attr("height", pieHeight)
+        .append("g")
+        .attr("transform", `translate(${pieWidth / 2}, ${pieHeight / 2})`);
 
-    // Add lines
-    labelLines.append("line")
-      .attr("x1", d => arc.centroid(d)[0])
-      .attr("y1", d => arc.centroid(d)[1])
-      .attr("x2", (d, i) => labelPositions[i].x)
-      .attr("y2", (d, i) => labelPositions[i].y)
-      .attr("stroke", "#666")
-      .attr("stroke-width", 1);
+      const pieData = [
+        { name: 'Existing Customer', value: data.totals['Existing Customer'].acv },
+        { name: 'New Customer', value: data.totals['New Customer'].acv }
+      ];
 
-    // Add labels
-    labelLines.append("text")
-      .attr("x", (d, i) => labelPositions[i].labelX)
-      .attr("y", (d, i) => labelPositions[i].y)
-      .attr("text-anchor", (d, i) => labelPositions[i].textAnchor)
-      .attr("alignment-baseline", "middle")
-      .attr("font-size", "14px")
-      .style("fill", "#333")
-      .text(d => `$${(d.data.value / 1000).toFixed(0)}K (${(d.data.value / data.totals['Total'].acv * 100).toFixed(0)}%)`);
+      const pie = d3.pie()
+        .value(d => d.value)
+        .sort(null); // Prevent automatic sorting
+
+      const arc = d3.arc()
+        .innerRadius(radius * 0.5)
+        .outerRadius(radius);
+
+      // Create pie chart segments
+      const segments = svg.selectAll("path")
+        .data(pie(pieData))
+        .join("path")
+        .attr("d", arc)
+        .attr("fill", d => color(d.data.name))
+        .attr("stroke", "white")
+        .style("stroke-width", "2px");
+
+      // Add center text
+      const centerGroup = svg.append("g");
+      
+      centerGroup.append("text")
+        .attr("text-anchor", "middle")
+        .attr("dy", "-0.2em")
+        .attr("font-size", "16px")
+        .style("font-weight", "500")
+        .text("Total");
+
+      centerGroup.append("text")
+        .attr("text-anchor", "middle")
+        .attr("dy", "1.2em")
+        .attr("font-size", "16px")
+        .style("font-weight", "600")
+        .text(`$${(data.totals['Total'].acv / 1000).toFixed(0)}K`);
+
+      // Add value labels with lines
+      const labelLines = svg.selectAll(".label-line")
+        .data(pie(pieData))
+        .join("g")
+        .attr("class", "label-line");
+
+      // Add label lines
+      labelLines.append("line")
+        .attr("x1", d => arc.centroid(d)[0] * 0.98)
+        .attr("y1", d => arc.centroid(d)[1] * 0.98)
+        .attr("x2", d => arc.centroid(d)[0] * 1.5)
+        .attr("y2", d => arc.centroid(d)[1] * 1.5)
+        .attr("stroke", "#666")
+        .attr("stroke-width", 0.5);
+
+      // Add label text
+      labelLines.append("text")
+        .attr("x", d => {
+          const centroid = arc.centroid(d);
+          return centroid[0] > 0 ? centroid[0] * 1.6 : centroid[0] * 1.6;
+        })
+        .attr("y", d => {
+          const centroid = arc.centroid(d);
+          return centroid[1] * 1.6;
+        })
+        .attr("text-anchor", d => {
+          const centroid = arc.centroid(d);
+          return centroid[0] > 0 ? "start" : "end";
+        })
+        .attr("dominant-baseline", "middle")
+        .style("font-size", "12px")
+        .style("fill", "#333")
+        .text(d => `$${(d.data.value / 1000).toFixed(0)}K (${(d.data.value / data.totals['Total'].acv * 100).toFixed(0)}%)`);
+    };
+
+    pieChart();
 
     // Create table
     if (typeof window !== 'undefined') {
