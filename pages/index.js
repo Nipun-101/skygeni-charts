@@ -1,5 +1,5 @@
 import Head from "next/head";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import * as d3 from "d3";
 import { Geist, Geist_Mono } from "next/font/google";
 import styles from "@/styles/Visualization.module.css";
@@ -15,54 +15,30 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-const customerData = [
-  {
-    quarter: "2023-Q3",
-    rows: [
-      { type: "Existing Customer", opps: 46, acv: 1322310, percentage: "57%" },
-      { type: "New Customer", opps: 14, acv: 983031, percentage: "43%" },
-      { type: "Total", opps: 60, acv: 2305341, percentage: "100%" }
-    ]
-  },
-  {
-    quarter: "2023-Q4",
-    rows: [
-      { type: "Existing Customer", opps: 45, acv: 1124857, percentage: "74%" },
-      { type: "New Customer", opps: 10, acv: 387300, percentage: "26%" },
-      { type: "Total", opps: 55, acv: 1512157, percentage: "100%" }
-    ]
-  },
-  {
-    quarter: "2024-Q1",
-    rows: [
-      { type: "Existing Customer", opps: 51, acv: 1360047, percentage: "81%" },
-      { type: "New Customer", opps: 6, acv: 313189, percentage: "19%" },
-      { type: "Total", opps: 57, acv: 1673236, percentage: "100%" }
-    ]
-  },
-  {
-    quarter: "2024-Q2",
-    rows: [
-      { type: "Existing Customer", opps: 23, acv: 647821, percentage: "74%" },
-      { type: "New Customer", opps: 6, acv: 224643, percentage: "26%" },
-      { type: "Total", opps: 29, acv: 872465, percentage: "100%" }
-    ]
-  }
-];
-
-const totals = {
-  "Existing Customer": { opps: 165, acv: 4455036, percentage: "70%" },
-  "New Customer": { opps: 36, acv: 1908164, percentage: "30%" },
-  "Total": { opps: 201, acv: 6363200, percentage: "100%" }
-};
-
 export default function Home() {
   const tableRef = useRef();
   const barChartRef = useRef();
   const pieChartRef = useRef();
+  const [data, setData] = useState({ customerData: [], totals: {} });
 
   useEffect(() => {
-    if (typeof window === 'undefined') return;
+    // Fetch data from API
+    fetch('/api/charts')
+      .then(response => response.json())
+      .then(data => {
+        setData(data);
+        // console.log(data);
+        
+      })
+      .catch(error => {
+        console.error('Error fetching chart data:', error);
+      });
+  }, []);
+
+  useEffect(() => {
+
+   
+    if (typeof window === 'undefined' || !data.customerData.length) return;
 
     // Clear existing charts
     d3.select(barChartRef.current).selectAll("*").remove();
@@ -80,11 +56,11 @@ export default function Home() {
       .append("g")
       .attr("transform", `translate(${barMargin.left},${barMargin.top})`);
 
-    const quarters = customerData.map(d => d.quarter);
+    const quarters = data.customerData.map(d => d.quarter);
     const stackedData = d3.stack()
       .keys(['Existing Customer', 'New Customer'])
       .value((d, key) => d.rows.find(r => r.type === key).acv)
-      (customerData);
+      (data.customerData);
 
     const x = d3.scaleBand()
       .domain(quarters)
@@ -92,7 +68,7 @@ export default function Home() {
       .padding(0.3);
 
     const y = d3.scaleLinear()
-      .domain([0, d3.max(customerData, d => d.rows.find(r => r.type === 'Total').acv)])
+      .domain([0, d3.max(data.customerData, d => d.rows.find(r => r.type === 'Total').acv)])
       .range([barHeight, 0]);
 
     // Add X axis
@@ -207,7 +183,7 @@ export default function Home() {
 
     // Add total value labels at the top of each bar
     svg.selectAll(".total-label")
-      .data(customerData)
+      .data(data.customerData)
       .join("text")
       .attr("class", "total-label")
       .attr("x", d => x(d.quarter) + x.bandwidth() / 2)
@@ -265,8 +241,8 @@ export default function Home() {
       .attr("transform", `translate(${pieWidth / 2},${pieHeight / 2})`);
 
     const pieData = [
-      { name: 'Existing Customer', value: totals['Existing Customer'].acv },
-      { name: 'New Customer', value: totals['New Customer'].acv }
+      { name: 'Existing Customer', value: data.totals['Existing Customer'].acv },
+      { name: 'New Customer', value: data.totals['New Customer'].acv }
     ];
 
     const pie = d3.pie()
@@ -301,7 +277,7 @@ export default function Home() {
       .attr("dy", "1.2em")
       .attr("font-size", "16px")
       .style("font-weight", "600")
-      .text(`$${(totals['Total'].acv / 1000).toFixed(0)}K`);
+      .text(`$${(data.totals['Total'].acv / 1000).toFixed(0)}K`);
 
     // Add value labels with lines
     const labelLines = pieSvg.selectAll(".label-line")
@@ -340,7 +316,7 @@ export default function Home() {
       .attr("alignment-baseline", "middle")
       .attr("font-size", "14px")
       .style("fill", "#333")
-      .text(d => `$${(d.data.value / 1000).toFixed(0)}K (${(d.data.value / totals['Total'].acv * 100).toFixed(0)}%)`);
+      .text(d => `$${(d.data.value / 1000).toFixed(0)}K (${(d.data.value / data.totals['Total'].acv * 100).toFixed(0)}%)`);
 
     // Create table
     if (typeof window !== 'undefined') {
@@ -399,7 +375,7 @@ export default function Home() {
           .attr('class', styles.dataCell);
 
         // Add data for each quarter
-        customerData.forEach(quarter => {
+        data.customerData.forEach(quarter => {
           const data = quarter.rows.find(r => r.type === type);
           row.append('td')
             .text(data.opps)
@@ -415,7 +391,7 @@ export default function Home() {
         });
 
         // Add totals
-        const totalData = totals[type];
+        const totalData = data.totals[type];
         row.append('td')
           .text(totalData.opps)
           .attr('class', `${styles.dataCell} ${styles.centerAlign}`);
@@ -429,7 +405,7 @@ export default function Home() {
           .attr('class', `${styles.dataCell} ${styles.rightAlign}`);
       });
     }
-  }, []);
+  }, [data]);
 
   return (
     <>
